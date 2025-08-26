@@ -12,29 +12,68 @@ import ESAT from "./pages/ESAT";
 import InterviewPrep from "./pages/InterviewPrep";
 import NotFound from "./pages/NotFound";
 
+// NEW / ADDED PAGES:
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+import DashboardStudent from "./pages/dashboard/Student";
+import DashboardTutor from "./pages/dashboard/Tutor";
+import Messages from "./pages/messages/Index";
+import Thread from "./pages/messages/Thread";
+
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Index />} />
-            <Route path="team" element={<Team />} />
-            <Route path="tmua" element={<TMUA />} />
-            <Route path="mat" element={<MAT />} />
-            <Route path="esat" element={<ESAT />} />
-            <Route path="interview-prep" element={<InterviewPrep />} />
-          </Route>
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Index />} />
+                <Route path="team" element={<Team />} />
+                <Route path="tmua" element={<TMUA />} />
+                <Route path="mat" element={<MAT />} />
+                <Route path="esat" element={<ESAT />} />
+                <Route path="interview-prep" element={<InterviewPrep />} />
+              </Route>
 
-export default App;
+              {/* Auth */}
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/auth/signup" element={<Signup />} />
+
+              {/* Dashboards */}
+              <Route
+                path="/dashboard/student"
+                element={
+                  <ProtectedRoute roles={["student", "admin"]}>
+                    <DashboardStudent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/tutor"
+                element={
+                  <ProtectedRoute roles={["tutor", "admin"]}>
+                    <DashboardTutor />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Messaging */}
+              <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+              <Route path="/messages/:conversationId" element={<ProtectedRoute><Thread /></ProtectedRoute>} />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
